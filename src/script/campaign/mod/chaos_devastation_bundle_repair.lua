@@ -42,6 +42,18 @@ local function repair()
     log("This count is regions checked, NOT bundles confirmed removed")
 end
 
-cm:add_first_tick_callback(function()
-    cm:callback(repair, 2, "chaos_devastation_bundle_repair_once")
-end)
+-- The campaign mod loader calls a global function named after the Lua filename.
+-- Defining it here ensures initialization when multiple scripts share a .pack.
+function chaos_devastation_bundle_repair()
+    log("entry point invoked")
+    cm:callback(function()
+        log("repair callback entered")
+        local ok, err = pcall(repair)
+        if not ok then
+            log("LUA ERROR: " .. tostring(err))
+        end
+    end, 2, "chaos_devastation_bundle_repair_once")
+    log("callback scheduled")
+end
+
+log("file evaluated")

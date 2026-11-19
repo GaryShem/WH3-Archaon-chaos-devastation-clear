@@ -1,6 +1,6 @@
 -- WH3 Chaos Invasion climate repair / diagnostic.
 -- Back up your save before setting APPLY_FIX to true.
-local APPLY_FIX = false
+local APPLY_FIX = true
 local PREFIX = "[ChaosClimate] "
 local function log(msg)
     out(PREFIX .. tostring(msg))
@@ -59,6 +59,18 @@ local function check_climate_state()
     end
 end
 
-cm:add_first_tick_callback(function()
-    cm:callback(check_climate_state, 2, "chaos_climate_repair_check")
-end)
+-- The campaign mod loader calls a global function named after the Lua filename.
+-- Defining it here ensures initialization when multiple scripts share a .pack.
+function chaos_climate_repair()
+    log("entry point invoked")
+    cm:callback(function()
+        log("repair callback entered")
+        local ok, err = pcall(check_climate_state)
+        if not ok then
+            log("LUA ERROR: " .. tostring(err))
+        end
+    end, 2, "chaos_climate_repair_once")
+    log("callback scheduled")
+end
+
+log("file evaluated")
